@@ -19,11 +19,14 @@ COPY . .
 RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache database \
     && chmod -R 777 storage bootstrap/cache database
 
+# Remove .env to force key generation
+RUN rm -f .env && cp .env.example .env
+
 # Install dependencies with error handling
 RUN composer install --no-interaction --no-dev --optimize-autoloader || echo "Composer completed with warnings"
 
 # Generate app key
-RUN php artisan key:generate --force || echo "Key generation skipped"
+RUN php artisan key:generate --force
 
 # Create SQLite database and run migrations
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
