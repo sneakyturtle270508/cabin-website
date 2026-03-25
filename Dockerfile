@@ -15,9 +15,9 @@ WORKDIR /var/www/html
 # Copy everything
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache database \
-    && chmod -R 777 storage bootstrap/cache database
+# Create necessary directories FIRST
+RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache database public/img \
+    && chmod -R 777 storage bootstrap/cache database public
 
 # Remove .env to force key generation
 RUN rm -f .env && cp .env.example .env
