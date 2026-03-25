@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: cabin-website
+    runtime: image
+    repo: https://github.com/sneakyturtle270508/cabin-website
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/database/database.sqlite
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_STORE
+        value: file
+      - key: STATAMIC_API_ENABLED
+        value: "false"
+      - key: STATAMIC_REVISIONS_ENABLED
+        value: "false"
+    healthCheckPath: /
+    autoDeploy: true
