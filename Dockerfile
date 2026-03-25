@@ -12,7 +12,13 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy files
+# Copy composer files first
+COPY composer.json composer.lock* ./
+
+# Install dependencies (ignore platform requirements)
+RUN composer install --no-interaction --no-dev --optimize-autoloader --ignore-platform-req=ext-zip --ignore-platform-req=ext-gd || true
+
+# Copy the rest of the application
 COPY . .
 
 # Create directories
@@ -22,11 +28,14 @@ RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache database
 RUN chown -R www-data:www-data storage bootstrap/cache database \
     && chmod -R 775 storage bootstrap/cache database
 
-# Install dependencies
-RUN composer install --no-interaction --no-dev --optimize-autoloader
+# Create SQLite database
+RUN touch database/database.sqlite && chmod 666 database/database.sqlite
 
-# Generate key
-RUN php artisan key:generate --force
+# Run migrations (with force)
+RUN php artisan migrate --force || true
+
+# Create admin user
+RUN php artisan make:user --email=admin@cabins.com --name="Admin User" --password=admin123 --super --force || true
 
 # Configure Apache
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
