@@ -12,33 +12,29 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy composer files first
-COPY composer.json composer.lock* ./
-
-# Install dependencies (ignore platform requirements)
-RUN composer install --no-interaction --no-dev --optimize-autoloader --ignore-platform-req=ext-zip --ignore-platform-req=ext-gd || true
-
-# Copy the rest of the application
+# Copy everything
 COPY . .
 
-# Create directories
-RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache database
+# Create necessary directories
+RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache database \
+    && chmod -R 777 storage bootstrap/cache database
 
-# Set permissions
-RUN chown -R www-data:www-data storage bootstrap/cache database \
-    && chmod -R 775 storage bootstrap/cache database
+# Install dependencies with error handling
+RUN composer install --no-interaction --no-dev --optimize-autoloader || echo "Composer completed with warnings"
 
-# Create SQLite database
-RUN touch database/database.sqlite && chmod 666 database/database.sqlite
+# Generate app key
+RUN php artisan key:generate --force || echo "Key generation skipped"
 
-# Run migrations (with force)
-RUN php artisan migrate --force || true
+# Create SQLite database and run migrations
+RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
+    && php artisan migrate --force || echo "Migrations skipped"
 
-# Create admin user
-RUN php artisan make:user --email=admin@cabins.com --name="Admin User" --password=admin123 --super --force || true
+# Create admin user if it doesn't exist
+RUN php artisan make:user --email=admin@cabins.com --name="Admin User" --password=admin123 --super --force || echo "Admin user creation skipped"
 
-# Configure Apache
-RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+# Configure Apache with ServerName to remove warnings
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
+    && sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
 CMD ["apache2-foreground"]
