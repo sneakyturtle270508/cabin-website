@@ -28,9 +28,8 @@ RUN mkdir -p \
 # Remove .env and copy from .env.example
 RUN rm -f .env && cp .env.example .env
 
-# Generate a random APP_KEY and set it directly
-RUN APP_KEY=$(openssl rand -base64 32) && \
-    sed -i "s/APP_KEY=/APP_KEY=base64:$APP_KEY/" .env
+# Generate a random APP_KEY using PHP
+RUN php -r "file_put_contents('.env', preg_replace('/^APP_KEY=.*/m', 'APP_KEY=base64:'.base64_encode(random_bytes(32)), file_get_contents('.env')));"
 
 # Install dependencies (skip scripts)
 RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
