@@ -15,10 +15,11 @@ WORKDIR /var/www/html
 # Copy everything
 COPY . .
 
-# Create ALL necessary directories BEFORE any composer commands
+# Create all necessary directories
 RUN mkdir -p \
     storage/framework/{cache,sessions,views} \
     storage/app/public \
+    storage/logs \
     bootstrap/cache \
     database \
     public/img \
@@ -27,11 +28,12 @@ RUN mkdir -p \
 # Remove .env and copy from .env.example
 RUN rm -f .env && cp .env.example .env
 
-# Install dependencies
-RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
+# Generate a random APP_KEY and set it directly
+RUN APP_KEY=$(openssl rand -base64 32) && \
+    sed -i "s/APP_KEY=/APP_KEY=base64:$APP_KEY/" .env
 
-# Generate app key
-RUN php artisan key:generate --force
+# Install dependencies (skip scripts)
+RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
 
 # Create SQLite database and run migrations
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
