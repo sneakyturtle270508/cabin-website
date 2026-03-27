@@ -15,15 +15,20 @@ WORKDIR /var/www/html
 # Copy everything
 COPY . .
 
-# Create necessary directories FIRST
-RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache database public/img \
+# Create ALL necessary directories BEFORE any composer commands
+RUN mkdir -p \
+    storage/framework/{cache,sessions,views} \
+    storage/app/public \
+    bootstrap/cache \
+    database \
+    public/img \
     && chmod -R 777 storage bootstrap/cache database public
 
-# Remove .env to force key generation
+# Remove .env and copy from .env.example
 RUN rm -f .env && cp .env.example .env
 
-# Install dependencies with error handling
-RUN composer install --no-interaction --no-dev --optimize-autoloader || echo "Composer completed with warnings"
+# Install dependencies
+RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
 
 # Generate app key
 RUN php artisan key:generate --force
@@ -35,7 +40,7 @@ RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
 # Create admin user if it doesn't exist
 RUN php artisan make:user --email=admin@cabins.com --name="Admin User" --password=admin123 --super --force || echo "Admin user creation skipped"
 
-# Configure Apache with ServerName to remove warnings
+# Configure Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
     && sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
