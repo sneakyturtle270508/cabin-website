@@ -10,6 +10,8 @@ services:
         value: production
       - key: APP_DEBUG
         value: true
+      - key: APP_URL
+        value: https://cabin-website.onrender.com
       - key: APP_KEY
         value: base64:a8X3BVNt3ccxeuN9WAqXxmiQQUk34Ix8OGWCeUXjFTc=
       - key: DB_CONNECTION
