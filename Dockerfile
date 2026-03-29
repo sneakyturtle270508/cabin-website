@@ -42,7 +42,7 @@ RUN rm -f .env && cp .env.example .env
 RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
 
 # Install Node dependencies and build assets
-RUN npm ci && npm run build
+RUN npm install && npm run build
 
 # Create SQLite database and run migrations
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
