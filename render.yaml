@@ -9,7 +9,7 @@ services:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: false
+        value: true
       - key: APP_KEY
         value: a8X3BVNt3ccxeuN9WAqXxmiQQUk34Ix8OGWCeUXjFTc=
       - key: DB_CONNECTION
@@ -24,5 +24,4 @@ services:
         value: "false"
       - key: STATAMIC_REVISIONS_ENABLED
         value: "false"
-    healthCheckPath: /
     autoDeploy: true
