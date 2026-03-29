@@ -25,6 +25,9 @@ RUN mkdir -p \
     public/img \
     && chmod -R 777 storage bootstrap/cache database public
 
+# Create views compiled directory
+RUN mkdir -p storage/framework/views && chmod 777 storage/framework/views
+
 # Remove .env and copy from .env.example
 RUN rm -f .env && cp .env.example .env
 
