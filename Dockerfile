@@ -1,8 +1,9 @@
 FROM php:8.3-apache
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libonig-dev libxml2-dev sqlite3 \
+    nodejs npm \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
     && a2enmod rewrite \
     && apt-get clean
@@ -33,6 +34,9 @@ RUN rm -f .env && cp .env.example .env
 
 # Install dependencies (skip scripts)
 RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
+
+# Install Node dependencies and build assets
+RUN npm ci && npm run build
 
 # Create SQLite database and run migrations
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
