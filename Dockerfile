@@ -44,7 +44,10 @@ RUN php artisan make:user --email=admin@cabins.com --name="Admin User" --passwor
 # Configure Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
     && sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
-    && cat /etc/apache2/sites-available/000-default.conf
+    && echo '<Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-default.conf \
+    && echo '    AllowOverride All' >> /etc/apache2/sites-available/000-default.conf \
+    && echo '    Require all granted' >> /etc/apache2/sites-available/000-default.conf \
+    && echo '</Directory>' >> /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
 CMD ["apache2-foreground"]
