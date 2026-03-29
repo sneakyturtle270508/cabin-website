@@ -41,8 +41,8 @@ RUN rm -f .env && cp .env.example .env
 # Install dependencies (skip scripts)
 RUN composer install --no-interaction --no-dev --optimize-autoloader --no-scripts
 
-# Install Node dependencies and build assets
-RUN npm install && npm run build
+# Install Node dependencies and build assets (devDependencies included for asset building)
+RUN npm install --include=dev && npm run build
 
 # Create SQLite database and run migrations
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
