@@ -48,11 +48,9 @@ RUN npm install --include=dev && npm run build
 RUN touch database/database.sqlite && chmod 666 database/database.sqlite \
     && php artisan migrate --force || echo "Migrations skipped"
 
-# Create tmp directory for tempnam()
-RUN mkdir -p /tmp/laravel && chmod 777 /tmp/laravel
-
-# Create admin user if it doesn't exist
-RUN TMPDIR=/tmp/laravel php artisan make:user --email=admin@cabins.com --name="Admin User" --password=admin123 --super --force || echo "Admin user creation skipped"
+# Copy entrypoint script that will create admin user at runtime
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Configure Apache
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
