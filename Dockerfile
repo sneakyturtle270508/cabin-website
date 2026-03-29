@@ -17,7 +17,7 @@ COPY . .
 
 # Create all necessary directories
 RUN mkdir -p \
-    storage/framework/{cache,sessions,views} \
+    storage/framework/{cache/data,sessions,views} \
     storage/app/public \
     storage/logs \
     bootstrap/cache \
