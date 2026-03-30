@@ -1,35 +1,41 @@
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
-$app = require_once __DIR__.'/../bootstrap/app.php';
-$kernel = $app->make(Kernel::class);
-$kernel->bootstrap();
+// Direct database approach without Laravel bootstrap
+$dbPath = __DIR__.'/../database/database.sqlite';
+$pdo = new PDO('sqlite:'.$dbPath);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-use App\Models\User;
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Support\Facades\Hash;
-use Statamic\Facades\Role;
+echo "Setting up admin user...\n";
 
-// Create super role if not exists
-$role = Role::where('handle', 'super')->first();
-if (! $role) {
-    $role = Role::make()->handle('super')->title('Super')->save();
-    echo "Created super role\n";
+// Create users table if not exists
+$pdo->exec('CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    email_verified_at TIMESTAMP NULL,
+    password VARCHAR(255) NOT NULL,
+    remember_token VARCHAR(100) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+)');
+
+// Check if user exists
+$stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
+$stmt->execute(['admin@example.com']);
+$existing = $stmt->fetch();
+
+if ($existing) {
+    // Update password
+    $hash = password_hash('admin123', PASSWORD_BCRYPT);
+    $stmt = $pdo->prepare('UPDATE users SET password = ? WHERE email = ?');
+    $stmt->execute([$hash, 'admin@example.com']);
+    echo "Updated password for admin@example.com\n";
+} else {
+    // Create user
+    $hash = password_hash('admin123', PASSWORD_BCRYPT);
+    $stmt = $pdo->prepare("INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, datetime('now'), datetime('now'))");
+    $stmt->execute(['Admin', 'admin@example.com', $hash]);
+    echo "Created user admin@example.com\n";
 }
 
-// Create user if not exists
-$user = User::where('email', 'admin@example.com')->first();
-if (! $user) {
-    $user = User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
-        'password' => Hash::make('admin123'),
-    ]);
-    echo "Created user\n";
-}
-
-// Assign role
-$user->assignRole('super');
-echo "Assigned super role\n";
-
-echo "Done! Login: admin@example.com / admin123\n";
+echo "Done! Try logging in at /cp with admin@example.com / admin123\n";
