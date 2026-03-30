@@ -65,10 +65,7 @@ RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf \
     && echo '<Directory /var/www/html/public>' >> /etc/apache2/sites-available/000-default.conf \
     && echo '    AllowOverride All' >> /etc/apache2/sites-available/000-default.conf \
     && echo '    Require all granted' >> /etc/apache2/sites-available/000-default.conf \
-    && echo '</Directory>' >> /etc/apache2/sites-available/000-default.conf \
-    && echo 'RewriteEngine On' >> /etc/apache2/sites-available/000-default.conf \
-    && echo 'RewriteCond %{HTTPS} off' >> /etc/apache2/sites-available/000-default.conf \
-    && echo 'RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]' >> /etc/apache2/sites-available/000-default.conf
+    && echo '</Directory>' >> /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
 COPY docker-entrypoint.sh /usr/local/bin/
