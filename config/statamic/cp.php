@@ -26,7 +26,7 @@ return [
     */
 
     'auth' => [
-        'enabled' => true,
+        'enabled' => env('STATAMIC_CP_AUTH', false),
         'redirect_to' => null,
     ],
 

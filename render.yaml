@@ -28,4 +28,6 @@ services:
         value: "false"
       - key: STATAMIC_REVISIONS_ENABLED
         value: "false"
+      - key: STATAMIC_CP_AUTH
+        value: "false"
     autoDeploy: true
