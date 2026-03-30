@@ -39,7 +39,7 @@ RUN mkdir -p storage/framework/views && chmod 777 storage/framework/views
 RUN rm -f .env && cp .env.example .env
 
 # Set APP_URL and APP_KEY for production
-RUN sed -i 's|APP_URL=http://localhost|APP_URL=https://cabin-website.onrender.com|' .env \
+RUN sed -i 's|APP_URL=.*|APP_URL=https://cabin-website.onrender.com|' .env \
     && sed -i 's|APP_KEY=|APP_KEY=base64:a8X3BVNt3ccxeuN9WAqXxmiQQUk34Ix8OGWCeUXjFTc=|' .env
 
 # Install dependencies (skip scripts)
